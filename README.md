@@ -2,8 +2,6 @@
 
 An undergraduate computational cosmology project: run the supplied Pantheon+SH0ES and compressed Planck-lite likelihoods in separate CosmoSIS pipelines, inspect their MCMC chains in Python, and compare the local distance-ladder result with both a Planck-likelihood exercise and Planck's published base-ΛCDM inference.
 
-> **Scope:** This repository demonstrates two short, separate inference pipelines and compares their marginalized $H_0$ posteriors. The Planck run uses the Standard Library's compressed Planck 2018 likelihood, not the full PLC likelihood. Neither educational chain is long enough to claim precision convergence. The project does not investigate proposed solutions to the Hubble tension.
-
 ## The problem
 
 The Hubble constant, $H_0$, describes the Universe's present expansion rate and is expressed in km s⁻¹ Mpc⁻¹. Two well-known routes to its value give different results:
@@ -62,64 +60,19 @@ The trace distinguishes walkers with muted colours and marks the burn-in cut. Th
 
 [Comparison PDF](plots/h0_planck_comparison.pdf) · [300-dpi PNG](plots/h0_planck_comparison.png)
 
-## Model and inference notes
-
-ΛCDM combines cold dark matter with a cosmological constant Λ. Flatness fixes spatial curvature at zero. Here, $Ω_m$ and $h$ are sampled with uniform priors [0.1, 0.5] and [0.6, 0.8]; $M$ has a uniform prior [-21, -18]. Other listed background parameters are held fixed. These priors are assumptions and should be reported with every result.
-
-The likelihood scores how well model distances match the observations. Bayes' rule combines that likelihood with the priors to form a posterior. MCMC draws correlated samples from the posterior. Marginalising means using the full joint sample to obtain the distribution of $h$ while accounting for uncertainty in the other sampled parameters. Burn-in is the early transient as walkers move away from their starting values. The 40% cut here is a visual choice prompted by the trace, not a formal convergence criterion.
-
-The CMB acoustic pattern constrains early-Universe densities and distances. Translating those into today's $H_0$ depends on the assumed cosmology. This repository now also runs the Standard Library's compressed Planck-lite likelihood with CAMB, but it does not independently reproduce the full Planck PLC analysis. SH0ES uses Cepheids to calibrate supernova-host distances, then Type Ia supernovae to extend the distance scale. The repository uses the supplied Pantheon+SH0ES likelihood and does not reanalyse the SH0ES paper.
-
 ## Literature context
 
 Planck Collaboration's 2018 CMB analysis, published in 2020, obtained very precise cosmological constraints and inferred $H_0=67.4\pm0.5$ km s⁻¹ Mpc⁻¹ under base ΛCDM. This is an early-Universe inference conditional on that model. As late-Universe measurements improved, Verde, Treu and Riess (2019) reviewed the growing discrepancy and noted that it was not obviously confined to one local measurement technique. Riess et al. (2022) reported $H_0=73.04\pm1.04$ km s⁻¹ Mpc⁻¹ from the SH0ES Cepheid–supernova distance ladder, after examining variations in anchors and analysis choices.
 
 Brout et al. (2022) introduced the Pantheon+ sample used by this project: 1,701 light curves from 1,550 distinct Type Ia supernovae. With SH0ES calibration, their flat-$w$CDM analysis found a value near $73.5\pm1.1$ km s⁻¹ Mpc⁻¹. Broader reviews, including Di Valentino et al. (2021), document many proposed explanations, but no solution is established by this project. Freedman et al. (2024) provide useful modern context: independent distance indicators and calibration choices continue to matter. Taken together, the literature frames the tension as a comparison between methods that probe different epochs and depend on different assumptions; this project reproduces that comparison without deciding whether its origin is systematic error, calibration, or physics beyond ΛCDM.
 
-## Reproduce the run
-
-From this project directory, activate and configure the existing CosmoSIS environment, run the configuration, then analyse and plot the text chain:
-
-```bash
-export PATH="$HOME/cosmosis/cosmosis-env/bin:$PATH"
-source "$HOME/cosmosis/cosmosis-env/bin/cosmosis-configure"
-cosmosis pantheon_plus_shoes.ini
-cosmosis planck_lite.ini
-python python/analyze_chain.py output/pantheon_plus_shoes_chain.txt
-python python/analyze_chain.py output/planck_lite_chain.txt
-python python/make_plots.py output/pantheon_plus_shoes_chain.txt
-```
-
-For a pipeline smoke check, use one iteration and a distinct output filename before the longer run:
-
-```bash
-cosmosis pantheon_plus_shoes.ini -p emcee.samples=1 emcee.nsteps=1 output.filename=${PWD}/output/smoke_chain.txt runtime.resume=F
-```
-
-The smoke chain is only a configuration check. The full runs write `output/pantheon_plus_shoes_chain.txt` and `output/planck_lite_chain.txt`; figures are saved to `plots/`. The Planck-lite chain uses 12 walkers and 30 iterations (360 rows), as an educational demonstration; increase the run length and check independent chains and convergence before interpreting its interval scientifically. Files under `output/` are generated run products and are not required to rerun the analysis.
-
 ## Limitations and open questions
 
-- **Convergence:** the trace moves substantially from its initial $h=0.7$ starting ball. Later samples explore a broad band, but a 300-iteration chain cannot establish reliable effective sample size or stable posterior intervals. Would the result stabilize with longer runs and multiple independent chains?
-- **Burn-in and priors:** the 40% cut and broad uniform priors are documented choices. How sensitive are the median and interval to a longer chain, a different defensible burn-in cut, or prior bounds?
+- **Convergence:** the trace moves substantially from its initial $h=0.7$ starting ball. Later samples explore a broad band, but a 300-iteration chain cannot establish reliable effective sample size or stable posterior intervals. Would the result stabilize with longer runs and multiple 
 - **Tension statistic:** the quadrature estimate treats an asymmetric interval as Gaussian and does not model cross-dataset systematics. A full consistency analysis would need a more complete statistical treatment.
 - **Planck likelihood:** the added Planck-lite likelihood is a compressed Gaussian approximation. It is suitable for a clear independent comparison exercise, but does not include the full PLC likelihood's detailed nuisance modelling. The literature comparison remains the published Planck 2018 result.
-- **Comparison provenance:** the Planck-lite likelihood is run in this project, but the chain is too short to report a reliable uncertainty; its median is shown as a pipeline check only. The $67.4\pm0.5$ interval is imported from the full Planck 2018 base-ΛCDM analysis. SH0ES is not independent of the Pantheon+SH0ES chain because its calibration is included in that likelihood.
-- **Scientific scope:** the project does not decide whether the discrepancy reflects systematics, calibration, limits of ΛCDM, or new physics. Alternative models and additional datasets remain outside this focused exercise.
+- **Comparison:** the Planck-lite likelihood is run in this project, but the chain is too short to report a reliable uncertainty; its median is shown as a pipeline check only. The $67.4\pm0.5$ interval is imported from the full Planck 2018 base-ΛCDM analysis. SH0ES is not independent of the Pantheon+SH0ES chain because its calibration is included in that likelihood.
 
-## Repository map
-
-```text
-Hubble-Tension/
-├── pantheon_plus_shoes.ini
-├── values.ini
-├── planck_lite.ini
-├── planck_values.ini
-├── planck_priors.ini
-├── output/                    # generated CosmoSIS chains
-├── python/                    # chain loading, statistics, plotting
-└── plots/                     # figures as 300-dpi PNG and vector PDF
-```
 
 ## References
 

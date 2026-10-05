@@ -1,0 +1,88 @@
+#cosmological_parameters--omega_m	cosmological_parameters--h0	supernova_params--m	COSMOLOGICAL_PARAMETERS--OMEGA_LAMBDA	prior	like	post
+#sampler=maxlike
+#n_varied=3
+#module_0=consistency 1.1
+#module_1=astropy_background 2.0
+## CITE The Astropy Collaboration et al 2022 ApJ 935 167
+#module_2=pantheon_plus 2022
+## CITE ApJ 938 110 (2022)
+## CITE Adam G. Riess et al 2022 ApJL 934 L7
+#timestamp=2026-10-05T15:38:31.759357
+#platform=macOS-26.6-arm64-arm-64bit
+#platform_version=Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:21 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T8140
+#uuid=00cb78112a6e4f028a3440c48ae03ce7
+#cosmosis_git_version=
+#csl_git_version=
+#cwd_git_version=d2bbf97418dff04da6f9e27620f3588e4e28f281
+#tolerance=1e-07
+#maxiter=2000
+#output_ini=/Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/output/pantheon_plus_shoes_maxlike_bestfit.ini
+#output_covmat=/Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/output/pantheon_plus_shoes_maxlike_covmat.txt
+#output_block=
+#method=BFGS
+#max_posterior=False
+#repeats=1
+#reiterations=1
+#nsteps=1
+#start_method=
+## START_OF_PARAMS_INI
+## [runtime]
+## sampler = maxlike
+## root = /Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/..
+## verbosity = standard
+## 
+## [maxlike]
+## method = BFGS
+## tolerance = 1e-7
+## maxiter = 2000
+## output_covmat = /Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/output/pantheon_plus_shoes_maxlike_covmat.txt
+## output_ini = /Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/output/pantheon_plus_shoes_maxlike_bestfit.ini
+## 
+## [output]
+## filename = /Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/output/pantheon_plus_shoes_maxlike.txt
+## format = text
+## 
+## [pipeline]
+## modules = consistency astropy pantheon_plus
+## values = /Users/svs/cosmosis/cosmosis-standard-library/Hubble-Tension/values.ini
+## extra_output = cosmological_parameters/omega_lambda
+## debug = F
+## timing = F
+## 
+## [consistency]
+## file = utility/consistency/consistency_interface.py
+## 
+## [astropy]
+## file = background/astropy_background/astropy_background.py
+## model = flatlambdacdm
+## nz = 300
+## zmax = 3.0
+## 
+## [pantheon_plus]
+## file = likelihood/pantheon_plus/pantheon_plus_shoes.py
+## likelihood_only = T
+## include_shoes = T
+## 
+## END_OF_PARAMS_INI
+## START_OF_VALUES_INI
+## [cosmological_parameters]
+## omega_m = 0.1  0.3  0.5
+## h0 = 0.6  0.7  0.8
+## omega_k = 0.0
+## w = -1.0
+## omega_b = 0.04
+## a_s = 2.0e-9
+## n_s = 1.0
+## tau = 0.08
+## 
+## [supernova_params]
+## m = -21.0  -19.35  -18.0
+## 
+## END_OF_VALUES_INI
+## START_OF_PRIORS_INI
+## END_OF_PRIORS_INI
+#start_input=
+0.33181214445682694	0.7353275764408578	-19.24405835605306	0.6681878555431731	1.4271163556401454	-726.0079442533387	-724.5808278976986
+#evaluations=214
+#successes=214
+#complete=1

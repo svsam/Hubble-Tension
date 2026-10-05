@@ -1,82 +1,127 @@
-# Reproducing the Hubble tension with CosmoSIS
+# Comparing Hubble-constant estimates with Pantheon+SH0ES
 
-An undergraduate computational cosmology project: run the supplied Pantheon+SH0ES and compressed Planck-lite likelihoods in separate CosmoSIS pipelines, inspect their MCMC chains in Python, and compare the local distance-ladder result with both a Planck-likelihood exercise and Planck's published base-ΛCDM inference.
+This project compares two analyses of the same calibrated Type Ia supernova data with published measurements of the present expansion rate. It runs a Markov chain Monte Carlo (MCMC) analysis and a deterministic maximum-likelihood fit through CosmoSIS. The aim is to make the difference between early-Universe and local distance-ladder estimates visible, much like a diagram makes differences between stars visible through measured properties.
 
-## The problem
+## The question
 
-The Hubble constant, $H_0$, describes the Universe's present expansion rate and is expressed in km s⁻¹ Mpc⁻¹. Two well-known routes to its value give different results:
+Can Pantheon+ supernova distances, with the SH0ES Cepheid calibration, recover the high local value of **H₀**, and do two different data-analysis methods give a similar result?
 
-- **Early-Universe inference:** Planck's CMB observations, interpreted under base ΛCDM, imply $H_0=67.4\pm0.5$ km s⁻¹ Mpc⁻¹.
-- **Local distance ladder:** the SH0ES Cepheid–Type Ia supernova analysis reports $H_0=73.04\pm1.04$ km s⁻¹ Mpc⁻¹.
+The reference values used for context are:
 
-The CMB result is inferred from the early Universe through a cosmological model. The distance ladder calibrates nearby Cepheid distances and uses Type Ia supernovae to reach larger distances. Comparing the two methods is commonly called the Hubble tension. This project asks whether a small CosmoSIS parameter-inference pipeline can reproduce and clearly display that difference.
+- **Planck 2018, base ΛCDM:** H₀ = 67.4 ± 0.5 km s⁻¹ Mpc⁻¹. This is an inference from the cosmic microwave background (CMB) under a cosmological model.
+- **SH0ES 2022:** H₀ = 73.04 ± 1.04 km s⁻¹ Mpc⁻¹. This is a local Cepheid–supernova distance-ladder result.
 
-## The approach
+The discrepancy between early-Universe and late-Universe determinations is called the Hubble tension. SH0ES is included in the likelihood used here as a calibration, so its published value is contextual and is not an independent cross-check of this project's fit.
 
-The model for both runs is spatially flat ΛCDM. The local-distance configuration starts from the Standard Library's `pantheon_plus_shoes.ini` example, fixes curvature to zero and $w=-1$, and keeps the supplied Pantheon+ likelihood with `include_shoes = T`. Pantheon+ supernovae constrain relative distances; without an absolute calibration, supernova absolute magnitude and expansion scale are degenerate. The included SH0ES calibration anchors that scale.
+## Data and cosmological model
 
-CosmoSIS samples $Ω_m$, the reduced Hubble parameter $h$, and supernova absolute magnitude $M$ in the Pantheon+SH0ES run. Since $h=H_0/(100\,\mathrm{km\,s^{-1}\,Mpc^{-1}})$, the Python analysis converts the chain using $H_0=100h$. Fixed background inputs and priors are documented in [`values.ini`](values.ini) and [`pantheon_plus_shoes.ini`](pantheon_plus_shoes.ini).
+The project uses the CosmoSIS Standard Library's Pantheon+SH0ES likelihood and its full statistical-plus-systematic covariance. The data file has 1,701 rows. The likelihood selects 1,657: 1,580 Hubble-flow supernovae with zHD > 0.01, plus 77 Cepheid calibrators. It uses the calibrators' Cepheid distances to anchor the absolute magnitude and the supernova distance scale.
 
-The second configuration, [`planck_lite.ini`](planck_lite.ini), uses CAMB to calculate CMB spectra and the CosmoSIS Standard Library's Python **Planck-lite 2018 TT,TE,EE compressed likelihood**. It samples $h$, $Ω_m$, $Ω_b$, $n_s$, $A_s$, and $τ$ with broad top-hat priors documented in [`planck_values.ini`](planck_values.ini) and [`planck_priors.ini`](planck_priors.ini); flatness, Λ, and the standard neutrino assumptions are fixed. The compressed likelihood supplies a Gaussian approximation to the published CMB constraints and omits the full PLC nuisance-parameter treatment. This makes it practical for a teaching comparison, but it is not a reproduction of Planck Collaboration's full parameter analysis. The chain and its posterior are labelled **Planck-lite** throughout. The literature's $67.4\pm0.5$ value remains separately labelled **Planck 2018 published**.
+Both Pantheon+SH0ES runs use the same flat ΛCDM model, data selection, likelihood, covariance, and parameter bounds. The sampled parameters are:
 
-In plain terms, a **Planck likelihood** scores how well a model's predicted CMB temperature and polarization power spectra match the observed Planck spectra. It accounts for measurement uncertainty and correlations between spectral bins. CAMB generates the predicted spectra for each trial cosmology; Planck-lite compares them with its compressed 2018 data product and returns a likelihood. MCMC combines those scores with the stated parameter priors to map a posterior, including a marginalized posterior for $H_0$.
+| Parameter | Meaning | Range / treatment |
+|---|---|---|
+| h = H₀/100 | Dimensionless expansion rate; H₀ = 100h km s⁻¹ Mpc⁻¹ | Uniform 0.6–0.8 |
+| Ωm | Present matter density fraction; controls the expansion history | Uniform 0.1–0.5 |
+| M | Standardized supernova absolute magnitude nuisance parameter | Uniform −21 to −18; SH0ES calibration helps anchor it |
 
-The Python workflow is split into three small programs:
+Spatial curvature is fixed to zero and dark energy is a cosmological constant, w = −1. Other listed background quantities in [`values.ini`](values.ini) are fixed compatibility inputs for this background-only supernova calculation; they are not inferred from these data. The local pipeline is configured in [`pantheon_plus_shoes.ini`](pantheon_plus_shoes.ini).
 
-1. [`chain_io.py`](python/chain_io.py) reads the CosmoSIS text chain and adds $H_0$ in physical units.
-2. [`analyze_chain.py`](python/analyze_chain.py) removes the declared burn-in fraction, calculates posterior percentiles, and estimates a smooth density with SciPy's Gaussian KDE.
-3. [`make_plots.py`](python/make_plots.py) creates the trace, posterior, and comparison figures with Matplotlib. The comparison includes the local-chain posterior, the exploratory Planck-lite chain median, and published reference intervals. Every retained local-chain sample appears in the rug marks; every recorded local-chain point is marked on the trace. Figures are exported as 300-dpi PNGs and vector PDFs for reports and journal workflows.
+Pantheon+ relative distances alone cannot fix an absolute H₀: the expansion scale and supernova absolute magnitude can shift together. The included SH0ES calibration helps break that degeneracy. The project uses the packaged likelihood and calibration; it does not reanalyse the underlying Cepheid observations.
 
-## What this run found
+## Two ways to handle the data
 
-The supplied Pantheon+ likelihood and covariance loaded successfully. A one-iteration smoke run verified the CosmoSIS-to-text-to-Python path, followed by a 300-iteration emcee run with eight walkers. The saved local educational chain has 2,400 rows and a mean acceptance fraction of 0.666. The Planck-lite configuration passed a pipeline smoke check with CAMB and the compressed likelihood, then completed a separate 30-iteration run with 12 walkers (360 rows). That short Planck chain has not been convergence-tested; its sample interval is preliminary and must not be read as a reliable uncertainty.
+### 1. MCMC posterior
 
-After dropping the first 40% of the Pantheon+SH0ES chain as burn-in, the local chain gives:
+[`pantheon_plus_shoes.ini`](pantheon_plus_shoes.ini) uses CosmoSIS emcee with eight walkers and 300 iterations per walker, for 2,400 recorded rows. MCMC proposes parameter values and accepts or rejects them according to the likelihood and prior, producing correlated samples from the posterior. The Python analysis removes the first 40% as burn-in and reports the median and 16th/84th percentiles. This summarizes H₀ while allowing Ωm and M to vary across the chain.
 
-| Quantity | Result | Provenance |
+### 2. Deterministic maximum likelihood
+
+[`pantheon_plus_shoes_maxlike.ini`](pantheon_plus_shoes_maxlike.ini) runs CosmoSIS's bounded BFGS optimizer on the same data and model. This is not Monte Carlo: it searches for the parameter point with the largest likelihood and returns one best-fit point. The saved inverse-Hessian covariance gives a local, quadratic approximation to parameter uncertainty. Its H₀ error is symmetric and depends on the likelihood being approximately Gaussian near the optimum; it is not a marginalized posterior interval.
+
+The optimizer found a much better likelihood than its initial point but emitted a precision-loss warning at termination. Its best-fit value is useful for comparison, while its Hessian-based uncertainty is provisional and should be checked with a profile-likelihood scan or a longer, well-converged chain before precision interpretation.
+
+## Results
+
+| Estimate | H₀ [km s⁻¹ Mpc⁻¹] | How it was obtained |
 |---|---:|---|
-| $H_0$ median | 73.36 km s⁻¹ Mpc⁻¹ | Marginalized from this project's CosmoSIS chain |
-| Central 68% interval | 72.57–74.43 km s⁻¹ Mpc⁻¹ | 16th and 84th percentiles of retained samples; asymmetric errors −0.78/+1.07 |
-| Planck-lite chain median | 67.39 km s⁻¹ Mpc⁻¹ | This project's short compressed-likelihood run; preliminary only |
-| Planck-lite sample interval | 67.30–67.50 km s⁻¹ Mpc⁻¹ | Central 68% of retained rows, not a reliable posterior interval because the chain is too short and starts near the best fit |
-| Planck reference | $67.4\pm0.5$ km s⁻¹ Mpc⁻¹ | Published Planck 2018 base-ΛCDM result |
-| SH0ES reference | $73.04\pm1.04$ km s⁻¹ Mpc⁻¹ | Published 2022 result; calibration is included in this project's likelihood |
+| Pantheon+SH0ES MCMC | 73.36 (+1.07/−0.78); central 68%: 72.57–74.43 | Median and quantiles after 40% burn-in; educational chain, not convergence-grade |
+| Pantheon+SH0ES maximum likelihood | 73.53 ± 1.59 | Deterministic best fit and local inverse-Hessian error |
+| Planck 2018 reference | 67.4 ± 0.5 | Published base-ΛCDM CMB inference |
+| SH0ES 2022 reference | 73.04 ± 1.04 | Published local distance-ladder value; its calibration enters this project's likelihood |
 
-Using half the local chain's central 68% interval as a Gaussian uncertainty gives an illustrative difference of about 5.65σ from the published Planck value. This is a teaching-level approximation, not a rigorous or universal tension statistic. The Planck-lite run verifies the CMB likelihood pathway and gives an initial comparison near the published Planck value, but 30 iterations are insufficient to map its posterior width. Its displayed sample interval is explicitly marked preliminary. Both chains are educational and should not be treated as precision measurements or robustly converged uncertainties.
+The two Pantheon+SH0ES methods place their central estimates close together near 73.4 km s⁻¹ Mpc⁻¹. Their uncertainty estimates differ: the MCMC interval is asymmetric and the deterministic error uses a local curvature approximation. The MCMC chain is short, and the BFGS run reported precision loss, so neither uncertainty should be treated as a precision result.
+
+For context, comparing the local MCMC median with the published Planck value using half the MCMC interval width as a Gaussian uncertainty gives an illustrative difference of about 5.65σ. This is a teaching approximation, not a rigorous or universal tension statistic. SH0ES calibration is part of the Pantheon+SH0ES likelihood, so the SH0ES reference is not statistically independent of the local fit.
 
 ## Figures
 
-The trace distinguishes walkers with muted colours and marks the burn-in cut. The posterior and comparison charts use black, white, and grayscale. The comparison's lower panel shows error bars for the local-chain central interval and both published reference values. The Planck-lite chain is marked by its exploratory median only because its short run does not justify a reliable error bar. SH0ES is included as context, not an independent data set, because its calibration enters the Pantheon+ likelihood. Each preview below links to a vector PDF for publication or further layout work.
+The Hubble diagram shows every likelihood-selected supernova, with vertical error bars from the diagonal of the supplied covariance matrix. The fit itself uses the full covariance, including correlations. Cepheid calibrators use their measured Cepheid distance moduli and are marked separately; the cosmological curve is compared with Hubble-flow supernovae. The lower panel shows Hubble-flow residuals from the deterministic best-fit curve.
 
-![Trace plot of all recorded H0 samples for each walker](plots/h0_trace.png)
+![Pantheon+SH0ES Hubble diagram with selected supernova data, covariance-diagonal error bars, maximum-likelihood curve, and Hubble-flow residuals](plots/pantheon_hubble_diagram.png)
 
-[Trace PDF](plots/h0_trace.pdf) · [300-dpi PNG](plots/h0_trace.png)
+[300-dpi PNG](plots/pantheon_hubble_diagram.png)
 
-![Pantheon+SH0ES posterior with histogram, KDE, central interval, and every retained sample](plots/h0_posterior.png)
+The trace marks every recorded MCMC value and the burn-in cut. The posterior histogram and KDE show the retained H₀ samples. The comparison figure places the MCMC interval, deterministic fit and error bar, and published values on one physical scale. Its figures use monochrome styling except for muted walker colours on the trace and are saved as 300-dpi PNGs.
 
-[Posterior PDF](plots/h0_posterior.pdf) · [300-dpi PNG](plots/h0_posterior.png)
+![MCMC trace for all eight Pantheon+SH0ES walkers](plots/h0_trace.png)
 
-![Project posterior and explicit error-bar comparison with Planck and SH0ES](plots/h0_planck_comparison.png)
+[300-dpi PNG](plots/h0_trace.png)
 
-[Comparison PDF](plots/h0_planck_comparison.pdf) · [300-dpi PNG](plots/h0_planck_comparison.png)
+![Pantheon+SH0ES marginalized H0 posterior with sample histogram, KDE, median, interval, and retained samples](plots/h0_posterior.png)
+
+[300-dpi PNG](plots/h0_posterior.png)
+
+![MCMC and deterministic Pantheon+SH0ES fits compared with published Planck and SH0ES values, with error bars](plots/h0_planck_comparison.png)
+
+[300-dpi PNG](plots/h0_planck_comparison.png)
+
+## How the Python analysis works
+
+- [`chain_io.py`](python/chain_io.py) reads CosmoSIS text-chain columns with pandas and converts h to H₀ = 100h.
+- [`analyze_chain.py`](python/analyze_chain.py) applies the burn-in cut, calculates sample percentiles, and uses SciPy's Gaussian KDE only to draw a smooth curve.
+- [`analyze_maxlike.py`](python/analyze_maxlike.py) reads the optimizer result and covariance matrix and converts the fitted h uncertainty into km s⁻¹ Mpc⁻¹.
+- [`make_plots.py`](python/make_plots.py) reads the installed Pantheon+SH0ES data and covariance for the Hubble diagram, then creates the analysis figures with Matplotlib.
+
+The analysis preserves the likelihood's selected sample and covariance diagonal for the data error bars. The fit uses the complete supplied covariance rather than treating supernova points as independent. MCMC and maximum likelihood use the same observations; only the parameter-handling method changes.
+
+## Planck reference
+
+The comparison uses the conventionally cited Planck 2018 base-ΛCDM result, H₀ = 67.4 ± 0.5 km s⁻¹ Mpc⁻¹, as a published reference value. This project does not run a Planck likelihood or recompute that constraint; it compares the reference with the Pantheon+SH0ES analysis and published SH0ES value.
+
+## Reproduce the analysis
+
+From this project directory, activate the existing CosmoSIS environment, then run the two Pantheon+SH0ES methods and Python analysis:
+
+```bash
+export PATH="$HOME/cosmosis/cosmosis-env/bin:$PATH"
+source "$HOME/cosmosis/cosmosis-env/bin/cosmosis-configure"
+cosmosis pantheon_plus_shoes.ini
+cosmosis pantheon_plus_shoes_maxlike.ini
+python python/analyze_chain.py output/pantheon_plus_shoes_chain.txt
+python python/analyze_maxlike.py
+python python/make_plots.py output/pantheon_plus_shoes_chain.txt
+```
+
+The MCMC chain is saved to `output/pantheon_plus_shoes_chain.txt`. The deterministic fit and inverse-Hessian matrix are saved to `output/pantheon_plus_shoes_maxlike.txt` and `output/pantheon_plus_shoes_maxlike_covmat.txt`. Figures are saved in `plots/` as 300-dpi PNGs.
 
 ## Literature context
 
-Planck Collaboration's 2018 CMB analysis, published in 2020, obtained very precise cosmological constraints and inferred $H_0=67.4\pm0.5$ km s⁻¹ Mpc⁻¹ under base ΛCDM. This is an early-Universe inference conditional on that model. As late-Universe measurements improved, Verde, Treu and Riess (2019) reviewed the growing discrepancy and noted that it was not obviously confined to one local measurement technique. Riess et al. (2022) reported $H_0=73.04\pm1.04$ km s⁻¹ Mpc⁻¹ from the SH0ES Cepheid–supernova distance ladder, after examining variations in anchors and analysis choices.
+Planck Collaboration's final 2018 cosmological-parameter analysis inferred H₀ = 67.4 ± 0.5 under base ΛCDM, a precise but model-dependent early-Universe result. Verde, Treu and Riess (2019) reviewed how improved late-Universe measurements had grown discrepant from the CMB inference and discussed evidence from more than one local technique. Riess et al. (2022) reported 73.04 ± 1.04 from the SH0ES Cepheid–supernova distance ladder after testing different anchors and analysis choices.
 
-Brout et al. (2022) introduced the Pantheon+ sample used by this project: 1,701 light curves from 1,550 distinct Type Ia supernovae. With SH0ES calibration, their flat-$w$CDM analysis found a value near $73.5\pm1.1$ km s⁻¹ Mpc⁻¹. Broader reviews, including Di Valentino et al. (2021), document many proposed explanations, but no solution is established by this project. Freedman et al. (2024) provide useful modern context: independent distance indicators and calibration choices continue to matter. Taken together, the literature frames the tension as a comparison between methods that probe different epochs and depend on different assumptions; this project reproduces that comparison without deciding whether its origin is systematic error, calibration, or physics beyond ΛCDM.
+Brout et al. (2022) presented Pantheon+, containing 1,701 light curves from 1,550 distinct Type Ia supernovae; with SH0ES calibration their stated flat-wCDM analysis found a value near 73.5 ± 1.1. Di Valentino et al. (2021) reviewed many proposed explanations for the tension, without establishing one. Freedman et al. (2024) provide modern context on independent distance indicators and calibration choices. Together this literature frames the issue as a comparison between methods that probe different epochs and depend on different physical assumptions. This project demonstrates that comparison without deciding whether the cause is calibration, systematic effects, or new physics.
 
 ## Limitations and open questions
 
-- **Convergence:** the trace moves substantially from its initial $h=0.7$ starting ball. Later samples explore a broad band, but a 300-iteration chain cannot establish reliable effective sample size or stable posterior intervals. Would the result stabilize with longer runs and multiple 
-- **Tension statistic:** the quadrature estimate treats an asymmetric interval as Gaussian and does not model cross-dataset systematics. A full consistency analysis would need a more complete statistical treatment.
-- **Planck likelihood:** the added Planck-lite likelihood is a compressed Gaussian approximation. It is suitable for a clear independent comparison exercise, but does not include the full PLC likelihood's detailed nuisance modelling. The literature comparison remains the published Planck 2018 result.
-- **Comparison:** the Planck-lite likelihood is run in this project, but the chain is too short to report a reliable uncertainty; its median is shown as a pipeline check only. The $67.4\pm0.5$ interval is imported from the full Planck 2018 base-ΛCDM analysis. SH0ES is not independent of the Pantheon+SH0ES chain because its calibration is included in that likelihood.
-
+- The 300-iteration MCMC chain is not long enough to establish convergence, effective sample size, or stable posterior limits. Would longer chains and independent starts stabilize the result?
+- The 40% burn-in cut is a visual choice, not a formal convergence diagnostic.
+- The maximum-likelihood BFGS optimizer emitted a precision-loss warning. Its inverse-Hessian uncertainty is provisional; a deterministic profile-likelihood calculation would be a useful next check.
+- The illustrative tension statistic assumes a Gaussianized asymmetric interval and does not model cross-dataset systematics.
+- This analysis does not resolve whether the Hubble tension results from calibration, unrecognized systematics, or limits of ΛCDM.
 
 ## References
 
-- CosmoSIS: [documentation](https://cosmosis.readthedocs.io/en/latest/), [installation](https://cosmosis.readthedocs.io/en/latest/intro/installation.html), [Standard Library overview](https://cosmosis.readthedocs.io/en/latest/usage/standard_library_overview.html), [Pantheon+ likelihood](https://cosmosis.readthedocs.io/en/latest/reference/standard_library/pantheon_plus.html), and Zuntz et al. (2015), [CosmoSIS: Modular cosmological parameter estimation](https://arxiv.org/abs/1409.3409).
+- CosmoSIS: [documentation](https://cosmosis.readthedocs.io/en/latest/), [installation](https://cosmosis.readthedocs.io/en/latest/intro/installation.html), [Standard Library](https://cosmosis.readthedocs.io/en/latest/usage/standard_library_overview.html), and [Pantheon+ likelihood](https://cosmosis.readthedocs.io/en/latest/reference/standard_library/pantheon_plus.html); Zuntz et al. (2015), [CosmoSIS: Modular cosmological parameter estimation](https://arxiv.org/abs/1409.3409).
 - Planck Collaboration (2020), [Planck 2018 results. VI. Cosmological parameters](https://www.aanda.org/articles/aa/abs/2020/09/aa33910-18/aa33910-18.html).
 - Riess et al. (2022), [SH0ES local distance-ladder measurement](https://arxiv.org/abs/2112.04510).
 - Brout et al. (2022), [The Pantheon+ Analysis: Cosmological Constraints](https://arxiv.org/abs/2202.04077).

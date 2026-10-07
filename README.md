@@ -56,68 +56,27 @@ For context, comparing the local MCMC median with the published Planck value usi
 
 ## Figures
 
-The Hubble diagram shows every likelihood-selected supernova, with vertical error bars from the diagonal of the supplied covariance matrix. The fit itself uses the full covariance, including correlations. Cepheid calibrators use their measured Cepheid distance moduli and are marked separately; the cosmological curve is compared with Hubble-flow supernovae. The lower panel shows Hubble-flow residuals from the deterministic best-fit curve.
+ The fit uses the full covariance, including correlations. Cepheid calibrators use their measured Cepheid distance moduli and are marked separately; the cosmological curve is compared with Hubble-flow supernovae. The lower panel shows Hubble-flow residuals from the deterministic best-fit curve.
 
 ![Pantheon+SH0ES Hubble diagram with selected supernova data, covariance-diagonal error bars, maximum-likelihood curve, and Hubble-flow residuals](plots/pantheon_hubble_diagram.png)
-
-[300-dpi PNG](plots/pantheon_hubble_diagram.png)
 
 The trace marks every recorded MCMC value and the burn-in cut. The posterior histogram and KDE show the retained H₀ samples. The comparison figure places the MCMC interval, deterministic fit and error bar, and published values on one physical scale. Its figures use monochrome styling except for muted walker colours on the trace and are saved as 300-dpi PNGs.
 
 ![MCMC trace for all eight Pantheon+SH0ES walkers](plots/h0_trace.png)
 
-[300-dpi PNG](plots/h0_trace.png)
-
 ![Pantheon+SH0ES marginalized H0 posterior with sample histogram, KDE, median, interval, and retained samples](plots/h0_posterior.png)
 
-[300-dpi PNG](plots/h0_posterior.png)
-
 ![MCMC and deterministic Pantheon+SH0ES fits compared with published Planck and SH0ES values, with error bars](plots/h0_planck_comparison.png)
-
-[300-dpi PNG](plots/h0_planck_comparison.png)
-
-## How the Python analysis works
-
-- [`chain_io.py`](python/chain_io.py) reads CosmoSIS text-chain columns with pandas and converts h to H₀ = 100h.
-- [`analyze_chain.py`](python/analyze_chain.py) applies the burn-in cut, calculates sample percentiles, and uses SciPy's Gaussian KDE only to draw a smooth curve.
-- [`analyze_maxlike.py`](python/analyze_maxlike.py) reads the optimizer result and covariance matrix and converts the fitted h uncertainty into km s⁻¹ Mpc⁻¹.
-- [`make_plots.py`](python/make_plots.py) reads the installed Pantheon+SH0ES data and covariance for the Hubble diagram, then creates the analysis figures with Matplotlib.
-
-The analysis preserves the likelihood's selected sample and covariance diagonal for the data error bars. The fit uses the complete supplied covariance rather than treating supernova points as independent. MCMC and maximum likelihood use the same observations; only the parameter-handling method changes.
 
 ## Planck reference
 
 The comparison uses the conventionally cited Planck 2018 base-ΛCDM result, H₀ = 67.4 ± 0.5 km s⁻¹ Mpc⁻¹, as a published reference value. This project does not run a Planck likelihood or recompute that constraint; it compares the reference with the Pantheon+SH0ES analysis and published SH0ES value.
-
-## Reproduce the analysis
-
-From this project directory, activate the existing CosmoSIS environment, then run the two Pantheon+SH0ES methods and Python analysis:
-
-```bash
-export PATH="$HOME/cosmosis/cosmosis-env/bin:$PATH"
-source "$HOME/cosmosis/cosmosis-env/bin/cosmosis-configure"
-cosmosis pantheon_plus_shoes.ini
-cosmosis pantheon_plus_shoes_maxlike.ini
-python python/analyze_chain.py output/pantheon_plus_shoes_chain.txt
-python python/analyze_maxlike.py
-python python/make_plots.py output/pantheon_plus_shoes_chain.txt
-```
-
-The MCMC chain is saved to `output/pantheon_plus_shoes_chain.txt`. The deterministic fit and inverse-Hessian matrix are saved to `output/pantheon_plus_shoes_maxlike.txt` and `output/pantheon_plus_shoes_maxlike_covmat.txt`. Figures are saved in `plots/` as 300-dpi PNGs.
 
 ## Literature context
 
 Planck Collaboration's final 2018 cosmological-parameter analysis inferred H₀ = 67.4 ± 0.5 under base ΛCDM, a precise but model-dependent early-Universe result. Verde, Treu and Riess (2019) reviewed how improved late-Universe measurements had grown discrepant from the CMB inference and discussed evidence from more than one local technique. Riess et al. (2022) reported 73.04 ± 1.04 from the SH0ES Cepheid–supernova distance ladder after testing different anchors and analysis choices.
 
 Brout et al. (2022) presented Pantheon+, containing 1,701 light curves from 1,550 distinct Type Ia supernovae; with SH0ES calibration their stated flat-wCDM analysis found a value near 73.5 ± 1.1. Di Valentino et al. (2021) reviewed many proposed explanations for the tension, without establishing one. Freedman et al. (2024) provide modern context on independent distance indicators and calibration choices. Together this literature frames the issue as a comparison between methods that probe different epochs and depend on different physical assumptions. This project demonstrates that comparison without deciding whether the cause is calibration, systematic effects, or new physics.
-
-## Limitations and open questions
-
-- The 300-iteration MCMC chain is not long enough to establish convergence, effective sample size, or stable posterior limits. Would longer chains and independent starts stabilize the result?
-- The 40% burn-in cut is a visual choice, not a formal convergence diagnostic.
-- The maximum-likelihood BFGS optimizer emitted a precision-loss warning. Its inverse-Hessian uncertainty is provisional; a deterministic profile-likelihood calculation would be a useful next check.
-- The illustrative tension statistic assumes a Gaussianized asymmetric interval and does not model cross-dataset systematics.
-- This analysis does not resolve whether the Hubble tension results from calibration, unrecognized systematics, or limits of ΛCDM.
 
 ## References
 

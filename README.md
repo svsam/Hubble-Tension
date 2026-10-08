@@ -80,55 +80,55 @@ Planck and SH0ES target the same present-day expansion rate, but infer it from d
 
 The CMB temperature and polarization power spectra contain acoustic peaks produced by photon–baryon oscillations before recombination. A particularly well-measured angular scale is
 
-\[
+$$
 \theta_* = \frac{r_s(z_*)}{D_M(z_*)},
-\]
+$$
 
-where \(z_*\) is the redshift of last scattering, \(r_s\) is the comoving sound horizon at that epoch, and \(D_M\) is the transverse comoving distance to it. In a flat cosmology,
+where $z_*$ is the redshift of last scattering, $r_s$ is the comoving sound horizon at that epoch, and $D_M$ is the transverse comoving distance to it. In a flat cosmology,
 
-\[
+$$
 r_s(z_*) = \int_{z_*}^{\infty} \frac{c_s(z)}{H(z)}\,\mathrm dz,
 \qquad
 D_M(z_*) = c\int_0^{z_*}\frac{\mathrm dz}{H(z)}.
-\]
+$$
 
-Planck fits the observed CMB spectra (including temperature, polarization, and lensing information) by varying cosmological parameters. Within base ΛCDM, those parameters determine both the early-time sound horizon and the distance to last scattering; the fitted \(\theta_*\), peak pattern, and other spectrum features then constrain \(H_0\). Thus Planck does **not** directly measure today’s expansion rate from nearby galaxy recession speeds: its reported \(H_0=67.4\pm0.5\ \mathrm{km\,s^{-1}\,Mpc^{-1}}\) is inferred under the base-ΛCDM assumptions. [Planck Collaboration (2020)](https://doi.org/10.1051/0004-6361/201833910)
+Planck fits the observed CMB spectra (including temperature, polarization, and lensing information) by varying cosmological parameters. Within base ΛCDM, those parameters determine both the early-time sound horizon and the distance to last scattering; the fitted $\theta_*$, peak pattern, and other spectrum features then constrain $H_0$. Thus Planck does **not** directly measure today’s expansion rate from nearby galaxy recession speeds: its reported $H_0=67.4\pm0.5\ \mathrm{km\,s^{-1}\,Mpc^{-1}}$ is inferred under the base-ΛCDM assumptions. [Planck Collaboration (2020)](https://doi.org/10.1051/0004-6361/201833910)
 
 ### SH0ES and Pantheon+: calibrate supernovae, then measure the Hubble flow
 
-The SH0ES distance ladder uses geometric distance anchors to calibrate Cepheid variable stars. Cepheid periods and brightnesses then give distances to galaxies that hosted Type Ia supernovae. Those host distances calibrate the supernovae’s absolute magnitude \(M_B\). The calibrated supernovae can then extend the distance scale to more distant galaxies in the Hubble flow.
+The SH0ES distance ladder uses geometric distance anchors to calibrate Cepheid variable stars. Cepheid periods and brightnesses then give distances to galaxies that hosted Type Ia supernovae. Those host distances calibrate the supernovae’s absolute magnitude $M_B$. The calibrated supernovae can then extend the distance scale to more distant galaxies in the Hubble flow.
 
-The distance modulus connects apparent magnitude \(m\), absolute magnitude \(M\), and luminosity distance \(D_L\):
+The distance modulus connects apparent magnitude $m$, absolute magnitude $M$, and luminosity distance $D_L$:
 
-\[
+$$
 \mu = m-M
     = 5\log_{10}\!\left(\frac{D_L}{\mathrm{Mpc}}\right)+25.
-\]
+$$
 
 For a flat ΛCDM model, the luminosity distance is
 
-\[
+$$
 D_L(z) = (1+z)\,\frac{c}{H_0}
 \int_0^z \frac{\mathrm dz'}{\sqrt{\Omega_m(1+z')^3+(1-\Omega_m)}}.
-\]
+$$
 
 At sufficiently low redshift this reduces approximately to the Hubble law,
 
-\[
+$$
 v\simeq cz\simeq H_0d,
 \qquad H_0\simeq\frac{cz}{d}.
-\]
+$$
 
-The Cepheid-calibrated supernovae supply the absolute distance scale \(d\) (equivalently \(M_B\)); Hubble-flow supernovae supply redshifts and apparent magnitudes over a larger distance range. Together they constrain \(H_0\). Pantheon+ supplies the broad Type Ia supernova distance–redshift sample, while the Pantheon+SH0ES likelihood used by this project includes the SH0ES calibration information. Pantheon+ alone, without an absolute calibration, mainly constrains relative distances and cannot independently fix the absolute scale. [Riess et al. (2022)](https://doi.org/10.3847/2041-8213/ac5c5b), [Brout et al. (2022)](https://arxiv.org/abs/2202.04077)
+The Cepheid-calibrated supernovae supply the absolute distance scale $d$ (equivalently $M_B$); Hubble-flow supernovae supply redshifts and apparent magnitudes over a larger distance range. Together they constrain $H_0$. Pantheon+ supplies the broad Type Ia supernova distance–redshift sample, while the Pantheon+SH0ES likelihood used by this project includes the SH0ES calibration information. Pantheon+ alone, without an absolute calibration, mainly constrains relative distances and cannot independently fix the absolute scale. [Riess et al. (2022)](https://doi.org/10.3847/2041-8213/ac5c5b), [Brout et al. (2022)](https://arxiv.org/abs/2202.04077)
 
 The two pathways can be summarized as
 
 | CMB / Planck | Cepheid–supernova / SH0ES |
 |---|---|
 | Fits acoustic structure in CMB power spectra. | Calibrates Cepheids and Type Ia supernova absolute magnitudes, then fits supernovae in the Hubble flow. |
-| Uses \(\theta_*=r_s/D_M\) and the full spectrum shape to constrain cosmological parameters. | Uses \(\mu=m-M=5\log_{10}(D_L/\mathrm{Mpc})+25\) and, at low redshift, \(H_0\simeq cz/d\). |
+| Uses $\theta_*=r_s/D_M$ and the full spectrum shape to constrain cosmological parameters. | Uses $\mu=m-M=5\log_{10}(D_L/\mathrm{Mpc})+25$ and, at low redshift, $H_0\simeq cz/d$. |
 | H₀ is inferred by extrapolating the assumed cosmological model to the present. | H₀ is inferred from late-time distances and redshifts, conditional on the distance-ladder calibration and supernova model. |
-| Planck 2018 base ΛCDM: \(67.4\pm0.5\). | SH0ES 2022: \(73.04\pm1.04\) km s⁻¹ Mpc⁻¹. |
+| Planck 2018 base ΛCDM: $67.4\pm0.5$. | SH0ES 2022: $73.04\pm1.04$ km s⁻¹ Mpc⁻¹. |
 
 These are not two direct measurements of different values at different epochs; they are two methods for estimating the same present-day parameter, with different data and assumptions. The tension could reflect unrecognized systematics or calibration effects, limitations of the assumed cosmological model, or new physics. This project compares the estimates but does not determine which explanation is correct. The Planck value is a published reference here; this project does not run a CMB likelihood.
 
